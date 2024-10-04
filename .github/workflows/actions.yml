@@ -16,13 +16,11 @@ jobs:
 
       - name: Build and run Docker container
         run: |
-          cd part1
-          docker build -t my-docker-image .
+          docker build -t my-docker-image ./part1/
           docker run my-docker-image
 
   swagger_job:
     runs-on: ubuntu-latest
-    needs: docker_job  # swagger_job зависит от выполнения docker_job
 
     steps:
       - name: Checkout code
@@ -30,6 +28,5 @@ jobs:
 
       - name: Run Swagger UI script
         run: |
-          cd part2
-          chmod +x run_swagger.sh
+          chmod +x .part2/run_swagger.sh
           ./run_swagger.sh
