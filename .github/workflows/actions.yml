@@ -19,10 +19,7 @@ jobs:
           docker build -t my-docker-image .
           # Запускаем контейнер в фоновом режиме
           docker run -d --name my-container my-docker-image
-          # Даем время на запуск сервера
-          sleep 10
-          
-          # Ваши тесты или команды здесь...
+          sleep 10  # Даем время на запуск сервера
           echo "Сервер Part1 запущен"
 
       - name: Stop Part1
@@ -35,16 +32,15 @@ jobs:
         run: |
           cd Part2
           chmod +x run_swagger.sh
-          # Запускаем скрипт и даем ему время
+          # Запускаем скрипт в фоновом режиме
           ./run_swagger.sh &
           SWAGGER_PID=$!
-          # Даем время на запуск сервера
-          sleep 10
-
-          # Ваши тесты или команды здесь...
           echo "Сервер Part2 запущен"
 
-      - name: Stop Swagger
-        run: |
-          kill $SWAGGER_PID
+          # Даем время послушать сервер
+          sleep 10
+
+          # Завершаем скрипт
+          kill $SWAGGER_PID || true  # Не обращаем внимания на ошибку, если PID не существует
+          wait $SWAGGER_PID || true   # Ждем завершения (если это возможно)
           echo "Сервер Part2 остановлен"
