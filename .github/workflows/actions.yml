@@ -1,34 +1,50 @@
-name: Run Docker and Swagger UI
+name: CI Pipeline
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  docker_job:
+  build_and_run:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build and run Docker container
+      - name: Build and run Part1
         run: |
           cd Part1
           docker build -t my-docker-image .
-          docker run my-docker-image
+          # Запускаем контейнер в фоновом режиме
+          docker run -d --name my-container my-docker-image
+          # Даем время на запуск сервера
+          sleep 10
+          
+          # Ваши тесты или команды здесь...
+          echo "Сервер Part1 запущен"
 
-  swagger_job:
-    runs-on: ubuntu-latest
+      - name: Stop Part1
+        run: |
+          docker stop my-container
+          docker rm my-container
+          echo "Сервер Part1 остановлен"
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Swagger UI script
+      - name: Run Swagger in Part2
         run: |
           cd Part2
           chmod +x run_swagger.sh
-          ./run_swagger.sh
+          # Запускаем скрипт и даем ему время
+          ./run_swagger.sh &
+          SWAGGER_PID=$!
+          # Даем время на запуск сервера
+          sleep 10
+
+          # Ваши тесты или команды здесь...
+          echo "Сервер Part2 запущен"
+
+      - name: Stop Swagger
+        run: |
+          kill $SWAGGER_PID
+          echo "Сервер Part2 остановлен"
